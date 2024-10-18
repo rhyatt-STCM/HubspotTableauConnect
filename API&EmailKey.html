@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Contact Properties</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 400px;
+        }
+        input {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fetch Contact Properties</h1>
+    <form id="contactForm">
+        <input type="text" id="apiKey" placeholder="Enter your API Key" required>
+        <input type="email" id="email" placeholder="Enter email address" required>
+        <button type="submit">Fetch Contact Properties</button>
+    </form>
+    <h2>Contact Properties:</h2>
+    <pre id="result"></pre>
+
+    <script>
+        async function fetchContactPropertiesByEmail(apiKey, email) {
+            const contactUrl = `https://api.hubapi.com/crm/v3/objects/contacts/search`;
+            
+            const requestBody = {
+                filterGroups: [
+                    {
+                        filters: [
+                            {
+                                propertyName: 'email',
+                                operator: 'EQ',
+                                value: email
+                            }
+                        ]
+                    }
+                ],
+                properties: [
+                    'address', 'associatedcompanyid', 'birthday', 'hs_lead_status', 
+                    'became_a_lead_on__buildertrend_import_', 'brand_contact_owner', 
+                    'city', 'company', 'country', 'createdate', 'date_of_birth', 
+                    'email', 'firstname', 'hs_additional_emails', 'hs_all_owner_ids', 
+                    'hs_all_team_ids', 'hs_content_membership_email', 
+                    'hs_created_by_user_id', 'hs_createdate', 
+                    'hs_date_entered_customer', 'hs_date_entered_lead', 
+                    'hs_facebook_ad_clicked', 'hs_first_outreach_date', 
+                    'hs_lastmodifieddate', 'hs_latest_source', 
+                    'hs_latest_source_data_1', 'hs_latest_source_data_2', 
+                    'hs_latest_source_timestamp', 'hs_object_id', 
+                    'hs_v2_date_entered_lead', 'lastname', 'postal_code__sss_', 
+                    'source', 'state', 'territory', 'territory_v2', 'zip'
+                ],
+                limit: 1
+            };
+
+            try {
+                const response = await fetch(contactUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Extract the specific properties if a contact is found
+                if (data.results.length > 0) {
+                    const contact = data.results[0];
+                    const filteredProperties = {
+                        address: contact.properties.address,
+                        associatedcompanyid: contact.properties.associatedcompanyid,
+                        birthday: contact.properties.birthday,
+                        hs_lead_status: contact.properties.hs_lead_status,
+                        became_a_lead_on__buildertrend_import_: contact.properties.became_a_lead_on__buildertrend_import_,
+                        brand_contact_owner: contact.properties.brand_contact_owner,
+                        city: contact.properties.city,
+                        company: contact.properties.company,
+                        country: contact.properties.country,
+                        createdate: contact.properties.createdate,
+                        date_of_birth: contact.properties.date_of_birth,
+                        email: contact.properties.email,
+                        firstname: contact.properties.firstname,
+                        hs_additional_emails: contact.properties.hs_additional_emails,
+                        hs_all_owner_ids: contact.properties.hs_all_owner_ids,
+                        hs_all_team_ids: contact.properties.hs_all_team_ids,
+                        hs_content_membership_email: contact.properties.hs_content_membership_email,
+                        hs_created_by_user_id: contact.properties.hs_created_by_user_id,
+                        hs_createdate: contact.properties.hs_createdate,
+                        hs_date_entered_customer: contact.properties.hs_date_entered_customer,
+                        hs_date_entered_lead: contact.properties.hs_date_entered_lead,
+                        hs_facebook_ad_clicked: contact.properties.hs_facebook_ad_clicked,
+                        hs_first_outreach_date: contact.properties.hs_first_outreach_date,
+                        hs_lastmodifieddate: contact.properties.hs_lastmodifieddate,
+                        hs_latest_source: contact.properties.hs_latest_source,
+                        hs_latest_source_data_1: contact.properties.hs_latest_source_data_1,
+                        hs_latest_source_data_2: contact.properties.hs_latest_source_data_2,
+                        hs_latest_source_timestamp: contact.properties.hs_latest_source_timestamp,
+                        hs_object_id: contact.properties.hs_object_id,
+                        hs_v2_date_entered_lead: contact.properties.hs_v2_date_entered_lead,
+                        lastname: contact.properties.lastname,
+                        postal_code__sss_: contact.properties.postal_code__sss_,
+                        source: contact.properties.source,
+                        state: contact.properties.state,
+                        territory: contact.properties.territory,
+                        territory_v2: contact.properties.territory_v2,
+                        zip: contact.properties.zip
+                    };
+
+                    // Log the filtered properties
+                    document.getElementById('result').textContent = JSON.stringify(filteredProperties, null, 2);
+                } else {
+                    document.getElementById('result').textContent = 'No contact found with the provided email.';
+                }
+            } catch (error) {
+                document.getElementById('result').textContent = 'Failed to fetch contact properties: ' + error;
+            }
+        }
+
+        document.getElementById('contactForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+            const apiKey = document.getElementById('apiKey').value;
+            const email = document.getElementById('email').value;
+            fetchContactPropertiesByEmail(apiKey, email);
+        });
+    </script>
+</body>
+</html>
